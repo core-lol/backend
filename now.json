@@ -1,1 +1,16 @@
-{"version":2,"name":"Backend","builds":[{"src":"www/**/*","use":"@now/static"},{"src":"api/**/*.js","use":"@now/node"}],"routes":[{"src":"/","dest":"www/index.html"}]}
+{
+    "version": 2,
+    "name": "Backend",
+    "builds": [
+        {
+            "src": "api/**/*.js",
+            "use": "@now/node"
+        }
+    ],
+    "routes": [
+        {
+            "src": "/(.*)",
+            "dest": "/api/$1"
+        }
+    ]
+}

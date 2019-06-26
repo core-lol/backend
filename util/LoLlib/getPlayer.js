@@ -1,15 +1,11 @@
-const redis = require('redis');
+const redisClient = require('../redisClient');
 const axios = require('axios');
 
 function getPlayer(username, region = "na1") {
     return new Promise((resolve, reject) => {
         // Create our endpoint to the League API feature we will be using, and the connection to our Redis DB.
         const endpoint = `https://${region}.api.riotgames.com/lol/summoner/v4/summoners/by-name/${username}`
-        const client = redis.createClient({
-            url: process.env.REDIS_URL,
-            password: process.env.REDIS_PW,
-        });
-
+        const client = redisClient();
         // Fetch the player from our Redis DB, and if we find it return it.
         // Otherwise we will fetch it from the League of Legends API, set it in cache, then return it.
         client.get(`getPlayer:${username}:${region}`, (err, reply) => {

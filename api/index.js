@@ -1,15 +1,16 @@
 const app = require('../util/app');
-const { getPlayer, getPlayerMatches } = require('../util/LoLlib');
+const { getPlayer, getPlayerMatches, getPlayerMatch } = require('../util/LoLlib');
 
 //Testing getting player matches.
 app.get('*', async (req, res) => {
     try {
-        let startTime = Date.now();
+        let startTime = Date.now(); // benchmarking time
         let player = await getPlayer('MichaeII');
         let matchesForPlayer = await getPlayerMatches(player.accountId);
         player.matchHistory = matchesForPlayer;
-        let endTime = Date.now()
-        console.log((endTime - startTime) / 1000);
+        player.matchHistory.matches[0] = await getPlayerMatch(player.matchHistory.matches[0].gameId)
+        let endTime = Date.now() // benchmarking time
+        console.log((endTime - startTime) / 1000); // benchmarking time
         res.status(200).json(player);
     } catch (err) {
         console.log(err);

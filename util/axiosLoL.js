@@ -8,6 +8,7 @@ axiosLoL.interceptors.request.use(config => {
     return Promise.reject(error);
   });
 
+// Here we will handle certain errors from the league of legends api and create messages for our users based on them.
 axiosLoL.interceptors.response.use(res => {
     return res
 }, error => {

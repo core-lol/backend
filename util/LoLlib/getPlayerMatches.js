@@ -2,14 +2,13 @@ const redisClient = require('../redisClient');
 const axios = require('../axiosLoL');
 const checkRateLimits = require('../checkRateLimits');
 
-function getPlayer(username, region = 'na1') {
+async function getPlayerMatches(accountId, beginIndex = 0, endIndex = 10, region = 'na1') {
     return new Promise((resolve, reject) => {
         // Create our endpoint to the League API feature we will be using, and the connection to our Redis DB.
-        const endpoint = `https://${region}.api.riotgames.com/lol/summoner/v4/summoners/by-name/${username}`
+        const endpoint = `https://${region}.api.riotgames.com/lol/match/v4/matchlists/by-account/${accountId}?endIndex=${endIndex}&beginIndex=${beginIndex}`;
         const client = redisClient();
-        // Fetch the player from our Redis DB, and if we find it return it.
-        // Otherwise we will fetch it from the League of Legends API, set it in cache, then return it.
-        client.get(`getPlayer:${username}:${region}`, (err, reply) => {
+
+        client.get(`getPlayerMatches:${accountId}:${region}:${beginIndex}-${endIndex}`, (err, reply) => {
             if (err) {
                 reject(err);
                 client.end(true);
@@ -18,7 +17,7 @@ function getPlayer(username, region = 'na1') {
                     axios.get(endpoint).then(async res => {
                         // Check rate limits. Delay actions if we are close to hitting rate limits.
                         const checkAPI = await checkRateLimits(res.headers);
-                        client.set(`getPlayer:${username}:${region}`, JSON.stringify(res.data), 'EX', 1000 * 60 * 60 * 1); // Expires in cache after 1 hour.
+                        client.set(`getPlayerMatches:${accountId}:${region}:${beginIndex}-${endIndex}`, JSON.stringify(res.data), 'EX', 1000 * 60 * 60 * 3); // Expires in cache after 3 hours.
                         resolve(res.data);
                         client.end(true);
                     }).catch(error => {
@@ -26,7 +25,7 @@ function getPlayer(username, region = 'na1') {
                         client.end(true);
                     })
                 } else {
-                    resolve(JSON.parse(reply))
+                    resolve(JSON.parse(reply));
                     client.end(true);
                 }
             }
@@ -34,4 +33,4 @@ function getPlayer(username, region = 'na1') {
     });
 }
 
-module.exports = getPlayer;
+module.exports = getPlayerMatches;

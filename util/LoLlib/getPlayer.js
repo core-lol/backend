@@ -10,11 +10,11 @@ function getPlayer(username, region = 'na1') {
         // Fetch the player from our Redis DB, and if we find it return it.
         // Otherwise we will fetch it from the League of Legends API, set it in cache, then return it.
         client.get(`getPlayer:${username}:${region}`, (err, reply) => {
-            if(err) {
+            if (err) {
                 reject(err);
                 client.end(true);
             } else {
-                if(reply) { // We don't have that user cached. So we will fetch it from the League of Legends API, then put it in our Cache.
+                if (!reply) { // We don't have that user cached. So we will fetch it from the League of Legends API, then put it in our Cache.
                     axios.get(endpoint).then(async res => {
                         // Check rate limits. Delay actions if we are close to hitting rate limits.
                         const checkAPI = await checkRateLimits(res.headers);

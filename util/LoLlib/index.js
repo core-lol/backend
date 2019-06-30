@@ -1,9 +1,9 @@
 const getPlayer = require('./getPlayer');
 const getPlayerMatches = require('./getPlayerMatches');
-const getPlayerMatch = require('./getPlayerMatch');
+const getMatch = require('./getMatch');
 
 module.exports = {
     getPlayer,
     getPlayerMatches,
-    getPlayerMatch
+    getMatch
 }

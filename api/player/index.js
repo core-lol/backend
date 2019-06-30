@@ -1,5 +1,5 @@
 const app = require('../../util/app');
-const { getPlayer, getPlayerMatches, getPlayerMatch } = require('../../util/LoLlib');
+const { getPlayer, getPlayerMatches, getMatch } = require('../../util/LoLlib');
 
 app.get('*', async (req, res) => {
     const { name } = req.query;
@@ -10,7 +10,7 @@ app.get('*', async (req, res) => {
         player.matchHistory = matchesForPlayer;
         // Loop through the general game data from the player, and get specific data for each one and put it in the player object.
         for (const [index, match] of player.matchHistory.matches.entries()) {
-            player.matchHistory.matches[index] = await getPlayerMatch(match.gameId);
+            player.matchHistory.matches[index] = await getMatch(match.gameId);
         }
         let endTime = Date.now() // benchmarking time
         console.log((endTime - startTime) / 1000); // benchmarking time

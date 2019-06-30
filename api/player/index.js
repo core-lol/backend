@@ -11,6 +11,7 @@ app.get('*', async (req, res) => {
         // Loop through the general game data from the player, and get specific data for each one and put it in the player object.
         for (const [index, match] of player.matchHistory.matches.entries()) {
             player.matchHistory.matches[index] = await getMatch(match.gameId);
+            delete player.matchHistory.matches[index].timeline // Remove the timeline, as this endpoint is for displaying "thumbnails" of matches.
         }
         let endTime = Date.now() // benchmarking time
         console.log((endTime - startTime) / 1000); // benchmarking time

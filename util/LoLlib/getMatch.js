@@ -6,20 +6,24 @@ async function getPlayerMatch(matchId, region = 'na1') {
     return new Promise((resolve, reject) => {
         // Create our endpoint to the League API feature we will be using, and the connection to our Redis DB.
         const endpoint = `https://${region}.api.riotgames.com/lol/match/v4/matches/${matchId}`;
+        const timelineEndpoint = `https://${region}.api.riotgames.com/lol/match/v4/timelines/by-match/${matchId}`;
         const client = redisClient();
 
-        client.get(`getPlayerMatch:${matchId}:${region}`, (err, reply) => {
+        client.get(`getMatch:${matchId}:${region}`, (err, reply) => {
             if (err) {
                 reject(err);
                 client.end(true);
             } else {
                 if (!reply) { // We don't have that match cached. So we will fetch it from the League of Legends API, then put it in our Cache.
-                    axios.get(endpoint).then(async res => {
-                        // Check rate limits. Delay actions if we are close to hitting rate limits.
-                        const checkAPI = await checkRateLimits(res.headers);
-                        client.set(`getPlayerMatch:${matchId}:${region}`, JSON.stringify(res.data), 'EX', 1000 * 60 * 60 * 24); // Expires in cache after 24 hours.
-                        resolve(res.data);
-                        client.end(true);
+                    let match = null;
+                    axios.get(endpoint).then(res => {
+                        match = res.data;
+                        axios.get(timelineEndpoint).then(result => {
+                            match.timeline = result.data;
+                            client.set(`getMatch:${matchId}:${region}`, JSON.stringify(match), 'EX', 1000 * 60 * 60 * 24); // Expires in cache after 24 hours.
+                            resolve(match);
+                            client.end(true);
+                        })
                     }).catch(error => {
                         reject(error);
                         client.end(true);

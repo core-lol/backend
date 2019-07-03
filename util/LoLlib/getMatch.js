@@ -1,6 +1,6 @@
 const redisClient = require('../redisClient');
 const axios = require('../axiosLoL');
-const checkRateLimits = require('../checkRateLimits');
+const formatMatch = require('./formatMatch');
 
 async function getPlayerMatch(matchId, region = 'na1') {
     return new Promise((resolve, reject) => {
@@ -20,6 +20,7 @@ async function getPlayerMatch(matchId, region = 'na1') {
                         match = res.data;
                         axios.get(timelineEndpoint).then(result => {
                             match.timeline = result.data;
+                            await formatMatch(match); // formatMatch will mutate the match object. No need to re-assign anything.
                             client.set(`getMatch:${matchId}:${region}`, JSON.stringify(match), 'EX', 1000 * 60 * 60 * 24); // Expires in cache after 24 hours.
                             resolve(match);
                             client.end(true);

@@ -18,7 +18,7 @@ async function getPlayerMatch(matchId, region = 'na1') {
                     let match = null;
                     axios.get(endpoint).then(res => {
                         match = res.data;
-                        axios.get(timelineEndpoint).then(result => {
+                        axios.get(timelineEndpoint).then(async result => {
                             match.timeline = result.data;
                             await formatMatch(match); // formatMatch will mutate the match object. No need to re-assign anything.
                             client.set(`getMatch:${matchId}:${region}`, JSON.stringify(match), 'EX', 1000 * 60 * 60 * 24); // Expires in cache after 24 hours.
